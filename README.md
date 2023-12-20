@@ -27,5 +27,8 @@
 
 ## 下載
 
+### v0.1.1
+[SlotGameGenerator-v0.1.1.zip](https://ailab-tool.s3.ap-southeast-1.amazonaws.com/SlotGameGenerator/SlotGameGenerator-v0.1.1.zip)
+
 ### v0.1.0
 [SlotGameGenerator-v0.1.0.zip](https://ailab-tool.s3.ap-southeast-1.amazonaws.com/SlotGameGenerator/SlotGameGenerator-v0.1.0.zip)
