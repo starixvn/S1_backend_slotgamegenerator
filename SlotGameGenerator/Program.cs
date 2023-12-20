@@ -29,94 +29,46 @@ var config = new CsvConfiguration(CultureInfo.CurrentCulture)
 };
 
 var csv = "slot.csv";
-List<NewGame> newGames;
 using (var streamReader = new StreamReader(csv))
 using (var csvReader = new CsvReader(streamReader, config))
 {
-    newGames = csvReader.GetRecords<NewGame>().ToList();
-}
-CreateSlotGame(id, tpId, newGames, WriteFile);
-WriteFile(Environment.NewLine);
-CreateGameCasinoExtra(id, tpId, newGames, WriteFile);
-WriteFile(Environment.NewLine);
-CreateGameCasinoInfo(id, tpId, newGames, WriteFile);
-WriteFile(Environment.NewLine);
-CreateSlotGameStatus(status, currencies, id, newGames.Count, WriteFile);
-
-// SlotGame
-static void CreateSlotGame(int lastId, int tpId, List<NewGame> games, Action<string> write)
-{
-    var sb = new StringBuilder("INSERT INTO Siebog.SlotGame (Id, TpId, CategoryId, TypeId, GameId, AppId, Fun, Device) VALUES\r\n");
-    for (int i = 0; i < games.Count; i++)
+    var slotGameBuilder = new StringBuilder("INSERT INTO Siebog.SlotGame (Id, TpId, CategoryId, TypeId, GameId, AppId, Fun, Device) VALUES");
+    var gameCasinoExtraBuilder = new StringBuilder("INSERT INTO Siebog.GameCasinoExtra (TpId, GameCasinoId, Reel, PayLine, RTP) VALUES");
+    var gameCasinoInfoBuilder = new StringBuilder("INSERT INTO Siebog.GameCasinoInfo (TpId, GameCasinoId, Name, Image, Lang) VALUES");
+    var slotGameStatusBuilder = new StringBuilder("INSERT INTO Siebog.SlotGameStatus (SiteId, CurrencyId, SlotGameId, Status, Operator) VALUES");
+    var newGames = csvReader.GetRecords<NewGame>();
+    var i = 1;
+    foreach (var game in newGames)
     {
-        var nextId = lastId + i + 1;
-        if (i == games.Count -1)
-            sb.Append($"({nextId}, {tpId}, 2, 1, '{games[i].GameId}', '{games[i].GameId}', {games[i].Fun}, {games[i].Device});");
-        else
-            sb.AppendLine($"({nextId}, {tpId}, 2, 1, '{games[i].GameId}', '{games[i].GameId}', {games[i].Fun}, {games[i].Device}),");
-    }
-    var values = sb.ToString();
-    write(values);
-}
+        var nextId = id + i;
+        slotGameBuilder.AppendLine();
+        slotGameBuilder.Append($"({nextId}, {tpId}, 2, 1, '{game.GameId}', '{game.GameId}', {game.Fun}, {game.Device}),");
 
-// GameCasinoExtra
-static void CreateGameCasinoExtra(int lastId, int tpId, List<NewGame> games, Action<string> write)
-{
-    var sb = new StringBuilder("INSERT INTO Siebog.GameCasinoExtra (TpId, GameCasinoId, Reel, PayLine, RTP) VALUES");
-    sb.AppendLine();
-    for (int i = 0; i < games.Count; i++)
-    {
-        var nextId = lastId + i + 1;
-        if(i == games.Count -1)
-            sb.Append($"({tpId}, {nextId}, '{games[i].Reel}', '{games[i].PayLine}', '{games[i].RTP}');");
-        else
-            sb.AppendLine($"({tpId}, {nextId}, '{games[i].Reel}', '{games[i].PayLine}', '{games[i].RTP}'),");
-    }
-    var values = sb.ToString();
-    write(values);
-}
+        gameCasinoExtraBuilder.AppendLine();
+        gameCasinoExtraBuilder.Append($"({tpId}, {nextId}, '{game.Reel}', '{game.PayLine}', '{game.RTP}'),");
 
-// GameCasinoInfo
-static void CreateGameCasinoInfo(int lastId, int tpId, List<NewGame> games, Action<string> write)
-{
-    var sb = new StringBuilder("INSERT INTO Siebog.GameCasinoInfo (TpId, GameCasinoId, Name, Image, Lang) VALUES");
-    sb.AppendLine();
-    for (int i = 0; i < games.Count; i++)
-    {
-        var nextId = lastId + i + 1;
-        if (i == games.Count - 1)
-        {
-            sb.AppendLine($"({tpId}, {nextId}, '{games[i].Ename}', 'null', 'en'),");
-            sb.Append($"({tpId}, {nextId}, '{games[i].Cname}', 'null', 'cs');");
-        }
-        else 
-        {
-            sb.AppendLine($"({tpId}, {nextId}, '{games[i].Ename}', 'null', 'en'),");
-            sb.AppendLine($"({tpId}, {nextId}, '{games[i].Cname}', 'null', 'cs'),");
-        }
-    }
-    var values = sb.ToString();
-    write(values);
-}
+        gameCasinoInfoBuilder.AppendLine();
+        gameCasinoInfoBuilder.Append($"({tpId}, {nextId}, '{game.Ename}', '', 'en'),");
+        gameCasinoInfoBuilder.AppendLine();
+        gameCasinoInfoBuilder.Append($"({tpId}, {nextId}, '{game.Cname}', '', 'cs'),");
 
-// SlotGameStatus
-static void CreateSlotGameStatus(int status, IEnumerable<GameCurrency> currencies, int lastId, int gameCount, Action<string> write) 
-{
-    var sb = new StringBuilder("INSERT INTO Siebog.SlotGameStatus (SiteId, CurrencyId, SlotGameId, Status, Operator) VALUES");
-    sb.AppendLine();
-    for (int i = 0; i < gameCount; i++)
-    {
-        var nextId = lastId + i + 1;
         foreach (var currency in currencies)
         {
-            sb.AppendLine($"({currency.SiteId}, {currency.CurrencyId}, {nextId}, {status}, 'Admin'),");
+            slotGameStatusBuilder.AppendLine();
+            slotGameStatusBuilder.Append($"({currency.SiteId}, {currency.CurrencyId}, {nextId}, {status}, 'Admin'),");
         }
+        i++;
     }
-    var values = sb.ToString().TrimEnd('\r', '\n', ',') + ";";
-    write(values);
+    WriteFile(slotGameBuilder.ToString().TrimEnd(',') + ";");
+    WriteFile(Environment.NewLine);
+    WriteFile(gameCasinoExtraBuilder.ToString().TrimEnd(',') + ";");
+    WriteFile(Environment.NewLine);
+    WriteFile(gameCasinoInfoBuilder.ToString().TrimEnd(',') + ";");
+    WriteFile(Environment.NewLine);
+    WriteFile(slotGameStatusBuilder.ToString().TrimEnd(',') + ";");
 }
 
-static void WriteFile(string script) 
+static void WriteFile(string script)
 {
     Console.WriteLine(script);
     using StreamWriter writer = new ("slot.sql", true);
