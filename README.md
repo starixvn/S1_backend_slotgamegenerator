@@ -5,7 +5,7 @@
 ## slot.csv
 | Ename | Cname | GameId | Reel | PayLine | RTP | Fun | Device |
 | ------| ----- | ------ | ---- | ------- | ----| --- | ------ |
-| Xiang Qi Ways 2 | 象棋之道 2 | 10042 | 3*4*5*4*3 | 720 Ways | 97.04% |1 | 0 |
+| Xiang Qi Ways 2 | 象棋之道 2 | 10042 | 3 * 4 * 5 * 4 * 3 | 720 Ways | 97.04% |1 | 0 |
 | Cookie Hunter | 打打姜饼人 | 10043 |5 * 3 | 20 Lines | 97.08% | 1 | 0
 
 - Ename: 英文遊戲名稱
